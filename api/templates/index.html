@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulario Entrenamiento IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-cyan-700 text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-bold">IA Student Predictor</h1>
+      <nav class="space-x-4">
+        <a href="#" class="hover:underline">Inicio</a>
+        <a href="#graficas" class="hover:underline">Predicciones</a>
+        <a href="#" class="hover:underline">Acerca</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow">
+    <div class="max-w-5xl mx-auto p-6 space-y-12">
+
+      <!-- Formulario -->
+      <section>
+        <h2 class="text-3xl font-bold text-center text-cyan-700 mb-6">Formulario para Entrenar IA</h2>
+        <form method="POST" class="bg-white shadow-md rounded-xl p-6 space-y-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold">ID Estudiante</label>
+              <input type="text" name="student_id" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Edad</label>
+              <input type="number" name="age" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Género</label>
+              <select name="gender" required class="w-full p-2 border rounded-md">
+                <option value="">Selecciona</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="O">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold">Nivel académico</label>
+              <input type="text" name="academic_level" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">País</label>
+              <input type="text" name="country" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Uso diario (horas)</label>
+              <input type="number" step="0.1" name="avg_daily_usage_hours" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Plataforma más usada</label>
+              <input type="text" name="most_used_platform" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Afecta el rendimiento académico</label>
+              <select name="affects_academic_performance" required class="w-full p-2 border rounded-md">
+                <option value="">Selecciona</option>
+                <option value="Yes">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold">Horas de sueño por noche</label>
+              <input type="number" step="0.1" name="sleep_hours_per_night" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Puntaje de salud mental</label>
+              <input type="number" name="mental_health_score" required class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Estado sentimental</label>
+              <input type="text" name="relationship_status" class="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label class="block font-semibold">Conflictos por redes sociales</label>
+              <select name="conflicts_over_social_media" class="w-full p-2 border rounded-md">
+                <option value="">Selecciona</option>
+                <option value="Yes">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-semibold">Índice de adicción (0 a 100)</label>
+              <input type="number" name="addicted_score" min="0" max="100" required class="w-full p-2 border rounded-md" />
+            </div>
+          </div>
+
+          <button type="submit" class="bg-cyan-700 text-white px-6 py-2 rounded-md hover:bg-cyan-800 transition mt-4">
+            Enviar
+          </button>
+        </form>
+      </section>
+
+      <!-- Gráficas -->
+      <section id="graficas">
+        <h2 class="text-2xl font-semibold text-center text-cyan-700 mb-4">Predicciones Generadas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-4 rounded-lg shadow h-64">
+            <canvas id="prediccion1" class="w-full h-full"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow h-64">
+            <canvas id="prediccion2" class="w-full h-full"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow h-64">
+            <canvas id="prediccion3" class="w-full h-full"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow h-64">
+            <canvas id="prediccion4" class="w-full h-full"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow h-64 md:col-span-2">
+            <canvas id="prediccion5" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Descripción -->
+      <section class="text-center mt-10">
+        <p class="text-lg text-gray-600">
+          Este formulario alimenta un modelo de inteligencia artificial que predice posibles impactos en el rendimiento académico, salud mental y otros factores.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-cyan-700 text-white text-center py-4 mt-10">
+    <p>&copy; 2025 IA Student Predictor | Proyecto académico</p>
+  </footer>
+
+  <!-- Scripts de predicción -->
+  <script>
+    const predicciones = {{ predicciones|default:"[]"|safe }};
+
+    const configs = [
+      { id: "prediccion1", tipo: "bar", label: "Rendimiento Académico" },
+      { id: "prediccion2", tipo: "line", label: "Salud Mental" },
+      { id: "prediccion3", tipo: "pie", label: "Relación con uso de redes" },
+      { id: "prediccion4", tipo: "bar", label: "Adicción" },
+      { id: "prediccion5", tipo: "line", label: "Horas de sueño vs. Estrés" }
+    ];
+
+    configs.forEach((cfg, index) => {
+      const ctx = document.getElementById(cfg.id).getContext("2d");
+      
+      let data = [];
+      if (cfg.tipo === "pie") {
+        data = [predicciones[index] || 30, 100 - (predicciones[index] || 30)];
+      } else {
+        data = new Array(4).fill(predicciones[index] || 0);
+      }
+
+      new Chart(ctx, {
+        type: cfg.tipo,
+        data: {
+          labels: cfg.tipo === "pie" ? ["Parte 1", "Parte 2"] : ["Ene", "Feb", "Mar", "Abr"],
+          datasets: [{
+            label: cfg.label,
+            data: data,
+            backgroundColor: "rgba(21, 94, 117, 0.6)",
+            borderColor: "rgba(21, 94, 117, 1)",
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: cfg.tipo !== "pie" ? {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          } : {}
+        }
+      });
+    });
+  </script>
+</body>
+</html>
