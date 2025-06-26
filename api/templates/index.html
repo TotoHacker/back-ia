@@ -105,24 +105,10 @@
       </section>
 
       <!-- Gráficas -->
-      <section id="graficas">
-        <h2 class="text-2xl font-semibold text-center text-cyan-700 mb-4">Predicciones Generadas</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white p-4 rounded-lg shadow h-64">
-            <canvas id="prediccion1" class="w-full h-full"></canvas>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow h-64">
-            <canvas id="prediccion2" class="w-full h-full"></canvas>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow h-64">
-            <canvas id="prediccion3" class="w-full h-full"></canvas>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow h-64">
-            <canvas id="prediccion4" class="w-full h-full"></canvas>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow h-64 md:col-span-2">
-            <canvas id="prediccion5" class="w-full h-full"></canvas>
-          </div>
+      <section id="graficas" class="mt-12">
+        <h2 class="text-2xl font-semibold text-center text-cyan-700 mb-4">Predicción Generada</h2>
+        <div class="bg-white p-4 rounded-lg shadow h-64">
+          <canvas id="prediccion1" class="w-full h-full"></canvas>
         </div>
       </section>
 
@@ -140,52 +126,35 @@
     <p>&copy; 2025 IA Student Predictor | Proyecto académico</p>
   </footer>
 
-  <!-- Scripts de predicción -->
+  <!-- Script para graficar la predicción -->
   <script>
-    const predicciones = {{ predicciones|default:"[]"|safe }};
-
-    const configs = [
-      { id: "prediccion1", tipo: "bar", label: "Rendimiento Académico" },
-      { id: "prediccion2", tipo: "line", label: "Salud Mental" },
-      { id: "prediccion3", tipo: "pie", label: "Relación con uso de redes" },
-      { id: "prediccion4", tipo: "bar", label: "Adicción" },
-      { id: "prediccion5", tipo: "line", label: "Horas de sueño vs. Estrés" }
-    ];
-
-    configs.forEach((cfg, index) => {
-      const ctx = document.getElementById(cfg.id).getContext("2d");
-      
-      let data = [];
-      if (cfg.tipo === "pie") {
-        data = [predicciones[index] || 30, 100 - (predicciones[index] || 30)];
-      } else {
-        data = new Array(4).fill(predicciones[index] || 0);
-      }
-
+    const valorPredicho = {{ prediction|default:"null"|safe }};
+    if (valorPredicho !== null) {
+      const ctx = document.getElementById("prediccion1").getContext("2d");
       new Chart(ctx, {
-        type: cfg.tipo,
+        type: "bar",
         data: {
-          labels: cfg.tipo === "pie" ? ["Parte 1", "Parte 2"] : ["Ene", "Feb", "Mar", "Abr"],
+          labels: ["Predicción de Rendimiento Académico"],
           datasets: [{
-            label: cfg.label,
-            data: data,
+            label: "Puntaje Estimado",
+            data: [valorPredicho],
             backgroundColor: "rgba(21, 94, 117, 0.6)",
             borderColor: "rgba(21, 94, 117, 1)",
-            fill: true,
+            borderWidth: 2
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: cfg.tipo !== "pie" ? {
+          scales: {
             y: {
               beginAtZero: true,
               max: 100
             }
-          } : {}
+          }
         }
       });
-    });
+    }
   </script>
 </body>
 </html>

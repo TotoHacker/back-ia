@@ -1,10 +1,17 @@
 from django.shortcuts import render
 from api.ml_model import predict_from_input, train_model
 from django.views.decorators.csrf import csrf_exempt
+import os
+
+MODEL_PATH = "infrastructure/modelo_entrenado.pkl"
 
 @csrf_exempt
 def predictor_form(request):
     prediction = None
+    
+    # Verificar si el modelo existe, si no, entrenar y guardarlo
+    if not os.path.exists(MODEL_PATH):
+        train_model()  # Entrena y guarda el modelo en la ruta MODEL_PATH
 
     if request.method == 'POST':
         data = {
