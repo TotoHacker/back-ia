@@ -1,38 +1,46 @@
+# api/ml_model.py
+
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
 import joblib
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from api.models import StudentInput
 import os
-import numpy as np
 
-MODEL_PATH = "infrastructure/model.pkl"
+MODEL_PATH_ADIC = "infrastructure/model_adiccion.pkl"
+MODEL_PATH_SALUD = "infrastructure/model_salud.pkl"
 
-def train_model(csv_path='infrastructure/Data/students_social_media_cleaned.csv'):
-    df = pd.read_csv(csv_path)
+def train_models():
+    qs = StudentInput.objects.all().values()
+    df = pd.DataFrame(qs)
 
-    # Verificamos que las columnas necesarias estén
-    required_cols = [
-        "age", "avg_daily_usage_hours", "sleep_hours_per_night", 
-        "mental_health_score", "addicted_score"
-    ]
-    for col in required_cols:
-        if col not in df.columns:
-            raise ValueError(f"Falta la columna requerida: {col}")
-    
-    # Si no hay performance_score, lo simulamos para pruebas
-    if "performance_score" not in df.columns:
-        df["performance_score"] = np.random.randint(60, 100, size=len(df))
+    # Modelo de adicción
+    df_adic = df.dropna(subset=['addicted_score'])
+    X_adic = df_adic[["age", "avg_daily_usage_hours", "sleep_hours_per_night"]]
+    y_adic = df_adic["addicted_score"]
 
-    features = df[required_cols]
-    target = df["performance_score"]
+    model_adic = LinearRegression()
+    model_adic.fit(X_adic, y_adic)
+    joblib.dump(model_adic, MODEL_PATH_ADIC)
 
-    model = RandomForestRegressor()
-    model.fit(features, target)
+    # Modelo de salud mental
+    df_salud = df.dropna(subset=['mental_health_score'])
+    X_salud = df_salud[["age", "avg_daily_usage_hours", "sleep_hours_per_night"]]
+    y_salud = df_salud["mental_health_score"]
 
-    joblib.dump(model, MODEL_PATH)
-    print("✅ Modelo entrenado y guardado en:", MODEL_PATH)
-    return model
+    model_salud = LinearRegression()
+    model_salud.fit(X_salud, y_salud)
+    joblib.dump(model_salud, MODEL_PATH_SALUD)
 
-def predict_from_input(data_dict):
-    model = joblib.load(MODEL_PATH)
-    X = pd.DataFrame([data_dict])
-    return model.predict(X)[0]
+def predict_all(data: dict):
+    if not os.path.exists(MODEL_PATH_ADIC) or not os.path.exists(MODEL_PATH_SALUD):
+        train_models()
+
+    model_adic = joblib.load(MODEL_PATH_ADIC)
+    model_salud = joblib.load(MODEL_PATH_SALUD)
+
+    df = pd.DataFrame([data])
+    addicted_score = round(model_adic.predict(df)[0], 2)
+    mental_health_score = round(model_salud.predict(df)[0], 2)
+
+    return addicted_score, mental_health_score
