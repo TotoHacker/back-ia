@@ -1,46 +1,62 @@
-# api/ml_model.py
-
 import pandas as pd
 import joblib
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from api.models import StudentInput
 import os
 
-MODEL_PATH_ADIC = "infrastructure/model_adiccion.pkl"
-MODEL_PATH_SALUD = "infrastructure/model_salud.pkl"
+MODEL_PATHS = [
+    "infrastructure/model_1.pkl",
+    "infrastructure/model_2.pkl",
+    "infrastructure/model_3.pkl",
+    "infrastructure/model_4.pkl",
+    "infrastructure/model_5.pkl",
+    "infrastructure/model_6.pkl",
+    "infrastructure/model_7.pkl",
+    "infrastructure/model_8.pkl",
+]
 
-def train_models():
-    qs = StudentInput.objects.all().values()
-    df = pd.DataFrame(qs)
+CSV_PATH = "infrastructure/Data/1_IDYGS93_cleaned.csv"
 
-    # Modelo de adicción
-    df_adic = df.dropna(subset=['addicted_score'])
-    X_adic = df_adic[["age", "avg_daily_usage_hours", "sleep_hours_per_night"]]
-    y_adic = df_adic["addicted_score"]
+def train_models_from_csv():
+    df = pd.read_csv(CSV_PATH)
 
-    model_adic = LinearRegression()
-    model_adic.fit(X_adic, y_adic)
-    joblib.dump(model_adic, MODEL_PATH_ADIC)
+    features = ["age", "avg_daily_usage_hours", "sleep_hours_per_night"]
+    targets = [
+        "mental_health_score",
+        "relationship_status",
+        "conflicts_over_social_media",
+        "addicted_score",
+        "gender",
+        "academic_level",
+        "country",
+        "most_used_platform",
+    ]
 
-    # Modelo de salud mental
-    df_salud = df.dropna(subset=['mental_health_score'])
-    X_salud = df_salud[["age", "avg_daily_usage_hours", "sleep_hours_per_night"]]
-    y_salud = df_salud["mental_health_score"]
+    for i, target in enumerate(targets):
+        if target not in df.columns:
+            print(f"Columna {target} no existe en CSV, saltando...")
+            continue
 
-    model_salud = LinearRegression()
-    model_salud.fit(X_salud, y_salud)
-    joblib.dump(model_salud, MODEL_PATH_SALUD)
+        df_target = df.dropna(subset=[target])
+        if df_target.empty:
+            print(f"No hay datos para {target}, saltando...")
+            continue
+
+        X = df_target[features]
+        y = df_target[target]
+
+        model = LinearRegression()
+        model.fit(X, y)
+        joblib.dump(model, MODEL_PATHS[i])
+        print(f"Modelo {i+1} entrenado para {target}")
 
 def predict_all(data: dict):
-    if not os.path.exists(MODEL_PATH_ADIC) or not os.path.exists(MODEL_PATH_SALUD):
-        train_models()
-
-    model_adic = joblib.load(MODEL_PATH_ADIC)
-    model_salud = joblib.load(MODEL_PATH_SALUD)
+    if any(not os.path.exists(p) for p in MODEL_PATHS):
+        train_models_from_csv()
 
     df = pd.DataFrame([data])
-    addicted_score = round(model_adic.predict(df)[0], 2)
-    mental_health_score = round(model_salud.predict(df)[0], 2)
+    preds = []
+    for path in MODEL_PATHS:
+        model = joblib.load(path)
+        preds.append(round(model.predict(df)[0], 2))
 
-    return addicted_score, mental_health_score
+    return tuple(preds)

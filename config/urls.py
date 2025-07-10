@@ -4,6 +4,6 @@ from api.views import formulario_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', formulario_view, name='formulario'),
+    path('formulario/', formulario_view),  # esta es la ruta de tu POST
     path('', include('predictor.urls')),
 ]

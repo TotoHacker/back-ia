@@ -1,7 +1,6 @@
 from django.db import models
 
 class StudentInput(models.Model):
-    # student_id = models.IntegerField()
     age = models.IntegerField()
     gender = models.IntegerField()
     academic_level = models.IntegerField()
@@ -14,6 +13,13 @@ class StudentInput(models.Model):
     relationship_status = models.IntegerField()
     conflicts_over_social_media = models.BooleanField()
     addicted_score = models.IntegerField()
-
+    target_1 = models.FloatField(null=True, blank=True)
+    target_2 = models.FloatField(null=True, blank=True)
+    target_3 = models.FloatField(null=True, blank=True)
+    target_4 = models.FloatField(null=True, blank=True)
+    target_5 = models.FloatField(null=True, blank=True)
+    target_6 = models.FloatField(null=True, blank=True)
+    target_7 = models.FloatField(null=True, blank=True)
+    target_8 = models.FloatField(null=True, blank=True)
     def __str__(self):
-        return f"{self.student_id} - Nivel académico: {self.academic_level}"
+        return f"Estudiante edad {self.age} nivel {self.academic_level}"

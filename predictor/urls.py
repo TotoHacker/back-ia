@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import predictor_form
+from .views import predictor_api
 
 urlpatterns = [
-    path('', predictor_form, name='formulario'),
+    path('predictor/', predictor_api, name='predictor_api'),
 ]
